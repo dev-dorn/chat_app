@@ -23,20 +23,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .formLogin(form -> form
-                   // .loginPage("/login") // Specifies the login page endpoint
-                    .loginProcessingUrl("/perform_login") // Specifies the processing URL for form login
-                    .defaultSuccessUrl("/", true) // URL to redirect to after successful login
-                    .failureUrl("/login?error=true") // URL to redirect to after login failure
-                    .permitAll()) // Allows everyone to see the login page
+                    // .loginPage("/login") // Uncomment if you have a custom login page
+                    .loginProcessingUrl("/perform_login") // Processing URL for form login
+                    .defaultSuccessUrl("/", true) // Redirect after successful login
+                    .failureUrl("/login?error=true") // Redirect after login failure
+                    .permitAll())
                 .logout(logout -> logout
                     .logoutUrl("/perform_logout") // URL to trigger logout
-                    .logoutSuccessUrl("/login") // URL to redirect to after successful logout
-                    .permitAll()) // Allows everyone to trigger logout
+                    .logoutSuccessUrl("/login") // Redirect after successful logout
+                    .permitAll())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/signup", "/login", "/perform_login", "/perform_logout").permitAll() // Allows access to these endpoints without authentication
-                    .anyRequest().authenticated()) // Requires authentication for any other request
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity
-                .userDetailsService(userDetailsService) // Use custom UserDetailsService
+                    .requestMatchers("/signup", "/login", "/perform_login", "/perform_logout", "/ms/**").permitAll() // Allow public access to these endpoints, including WebSocket endpoints
+                    .anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity (consider enabling in production)
+                .userDetailsService(userDetailsService)
                 .build();
     }
 
