@@ -11,8 +11,8 @@ Steps to Run the Project
 Clone the Repository: Clone the project repository from your version control system (e.g., GitHub).
 ```
 sh
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/dev-dorn/chat_app.git
+cd chat_app
 ```
 Configure the Application: Update the application.properties file with the MongoDB connection settings.
 ```
