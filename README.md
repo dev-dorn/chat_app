@@ -1,5 +1,5 @@
 # chat_app
-Absolutely, let's summarize the essential steps your interviewer needs to run the authentication backend project.
+
 
 Running the Authentication Backend Project
 Prerequisites
