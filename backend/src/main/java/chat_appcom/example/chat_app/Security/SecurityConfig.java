@@ -1,47 +1,44 @@
 package chat_appcom.example.chat_app.Security;
 
+import chat_appcom.example.chat_app.security.JwtFilter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
+    private final JwtFilter jwtFilter;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .formLogin(form -> form
-                    // .loginPage("/login") // Uncomment if you have a custom login page
-                    .loginProcessingUrl("/perform_login") // Processing URL for form login
-                    .defaultSuccessUrl("/", true) // Redirect after successful login
-                    .failureUrl("/login?error=true") // Redirect after login failure
-                    .permitAll())
-                .logout(logout -> logout
-                    .logoutUrl("/perform_logout") // URL to trigger logout
-                    .logoutSuccessUrl("/login") // Redirect after successful logout
-                    .permitAll())
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/signup", "/login", "/perform_login", "/perform_logout", "/ms/**").permitAll() // Allow public access to these endpoints, including WebSocket endpoints
-                    .anyRequest().authenticated())
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity (consider enabling in production)
-                .userDetailsService(userDetailsService)
-                .build();
+                    .requestMatchers("/**").permitAll())// Allow public access to these endpoints
+                    .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import chat_appcom.example.chat_app.model.User; // Ensure this import is correct
+import chat_appcom.example.chat_app.model.User;
 import chat_appcom.example.chat_app.repository.UserRepository;
+import chat_appcom.example.chat_app.security.JwtFilter;
 
 @RestController
 public class AuthController {
@@ -19,6 +20,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtFilter jwtFilter;  // ✅ Inject JwtFilter as a dependency
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody User user) {
@@ -31,11 +35,15 @@ public class AuthController {
     }
 
     @PostMapping("/perform_login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         User existingUser = userRepository.findByUsername(user.getUsername());
         if (existingUser == null || !passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
             return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("Login successful", HttpStatus.OK);
+
+        // ✅ Call generateToken through the injected JwtFilter instance
+        String token = jwtFilter.generateToken(existingUser.getUsername());
+
+        return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
     }
 }
